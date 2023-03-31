@@ -23,8 +23,8 @@ input[type="range"]::-webkit-slider-thumb {
   margin-top: -.3rem; /* compensate for height in Webkit */
   border: none;
   height: 2rem;
-  width: .5rem;
-  border-radius: 9999px;
+  width: 1.5rem; /* .5rem; */
+  border-radius: 2px;
   background: var(--gray-600);
 }
 
@@ -39,8 +39,8 @@ input[type="range"]:focus::-webkit-slider-thumb {
 input[type="range"]::-moz-range-thumb {
   border: none;
   height: 2rem;
-  width: .5rem;
-  border-radius: 9999px;
+  width: 1.5rem;
+  border-radius: 10px;
   background: var(--gray-600);
 }
 
@@ -55,8 +55,8 @@ input[type="range"]:focus::-moz-range-thumb {
 input[type="range"]::-ms-thumb {
   border: none;
   height: 2rem;
-  width: .5rem;
-  border-radius: 9999px;
+  width: 1.5rem;
+  border-radius: 2px; /* 9999px; */
   background: #718096;
 }
 

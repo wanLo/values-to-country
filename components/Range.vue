@@ -1,16 +1,16 @@
 <template>
   <div class="flex flex-grow justify-center items-start">
     <div
-      class="w-32 text-xs sm:text-sm text-gray-700 sm:whitespace-no-wrap text-right"
+      class="w-24 text-xs sm:text-sm text-gray-700 sm:whitespace-no-wrap text-right"
     >
       {{ left }}
     </div>
-    <div class="mx-4 w-full relative">
+    <div class="mx-2 w-full relative">
       <div
         v-if="rangeValue !== null"
         :style="rangeValueCSS"
-        style="left: var(--range-value); bottom: 2.25rem"
-        class="absolute bg-white text-gray-700 w-8 rounded-full text-center select-none"
+        style="left: var(--range-value); bottom: 2.1rem"
+        class="absolute text-sm text-gray-700 w-8 rounded-full text-center select-none"
       >
         {{ rangeValue }}
       </div>
@@ -25,7 +25,7 @@
         @input="$emit('update:rangeValue', parseFloat($event.target.value))"
       />
     </div>
-    <div class="w-32 text-xs sm:text-sm text-gray-700 sm:whitespace-no-wrap">
+    <div class="w-24 text-xs sm:text-sm text-gray-700 sm:whitespace-no-wrap">
       {{ right }}
     </div>
   </div>
@@ -66,10 +66,9 @@ export default {
           'rem)',*/
           '--range-value':
           'calc(' +
-          this.rangeValue * 11 +
+          this.rangeValue * 10.1 +
           '% + ' +
-          //(-4.1) +
-          (-3) +
+          (-2) +
           'rem)',
       }
     },

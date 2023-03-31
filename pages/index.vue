@@ -1,27 +1,36 @@
 <template>
-  <div>
-    <h2>
+  <div class="max-w-xl mx-auto px-1 items-center justify-center">
+    <h1 class="text-4xl text-gray-700 font-bold text-center mt-6">
+      Values to <br> Country 🌏
+    </h1>
+    <div class="my-8 mx-2 text-gray-800">
+      This tool lets you predict the country closest to your values, judged by some questions
+      from the <a href="https://www.worldvaluessurvey.org/wvs.jsp" class="underline">World Value Survey</a>.
+      The prediction is performed on your device, none of your data is sent anywhere.
+    </div>
+    <h2 class="my-8 mx-2 text-gray-800">
       Please tell me for each of the following actions whether you think it can always be justified, never be justified, or something in between.
     </h2>
-    <form class="w-full mx-auto flex flex-wrap items-center justify-center">
+    <form>
       <div
         v-for="(item, index) in survey"
         :key="item.question"
       >
-        <h3 class="text-xs sm:text-sm text-gray-700 sm:whitespace-no-wrap text-left mb-4 mt-8">
+        <h3 class="text-sm text-gray-700 sm:whitespace-no-wrap text-left mb-6 mt-4 mx-2">
           {{ item.question }}
         </h3>
         <Range
-          class="my-4"
+          class="my-4 mx-1"
           label-left="Never justifiable"
           label-right="Always justifiable"
           :range-value="get_answer(index)"
           @update:rangeValue="set_answer(index, $event)"
         />
+        <hr />
       </div>
     </form>
-    <h2>
-      The country closest to your values is: {{ predicted_country }}
+    <h2 class="my-16 mx-2 text-gray-800 text-center">
+      {{ predicted_country }}
     </h2>
   </div>
 </template>
@@ -149,10 +158,10 @@ export default {
       get() {
         const vector = this.survey.map(({value}) => value)
         if (Object.values(vector).includes(null)) {
-          return 'answers incomplete'
+          return 'Please fill in all answers to get a prediction.'
         }
         else {
-          return this.knn.predict(vector)
+          return "The country closest to your values is: " + this.knn.predict(vector)
         }
       }
     }
