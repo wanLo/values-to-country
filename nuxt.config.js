@@ -33,8 +33,8 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
     // https://go.nuxtjs.dev/tailwindcss
-    //'@nuxtjs/tailwindcss',
-    '@nuxt/postcss8',
+    '@nuxtjs/tailwindcss',
+    //'@nuxt/postcss8',
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
