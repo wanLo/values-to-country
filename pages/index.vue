@@ -129,7 +129,7 @@ export default {
     const training_data = wvs_data.map(({answers}) => answers)
     const training_labels = wvs_data.map(({country}) => country)
     this.knn = new KNN(training_data, training_labels, { k: 100 })
-    console.log(this.knn)
+    //console.log(this.knn)
   },
   methods: {
     get_answer(n) {
