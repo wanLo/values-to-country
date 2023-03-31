@@ -6,7 +6,9 @@
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
-    "generate": "nuxt generate"
+    "generate": "nuxt generate",
+    "predeploy": "nuxt generate",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "core-js": "^3.25.3",
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^5.3.5",
+    "gh-pages": "^5.0.0",
     "postcss": "^8.4.17"
   },
   "overrides": {
