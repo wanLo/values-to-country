@@ -1,8 +1,8 @@
 <template>
-  <!--<Tutorial/>-->
   <div>
-    {{ vector }}
-    {{ predicted_country }}
+    <h2>
+      Please tell me for each of the following actions whether you think it can always be justified, never be justified, or something in between.
+    </h2>
     <form class="w-full mx-auto flex flex-wrap items-center justify-center">
       <div
         v-for="(item, index) in survey"
@@ -20,6 +20,9 @@
         />
       </div>
     </form>
+    <h2>
+      The country closest to your values is: {{ predicted_country }}
+    </h2>
   </div>
 </template>
 
@@ -27,25 +30,6 @@
 import KNN from 'ml-knn'
 import Range from '~/components/Range'
 import * as d3 from "d3"
-
-var train_dataset = [
-  [0, 0, 0],
-  [0, 1, 1],
-  [1, 1, 0],
-  [2, 2, 2],
-  [1, 2, 2],
-  [2, 1, 2],
-]
-var train_labels = [0, 0, 0, 1, 1, 1]
-var knn = new KNN(train_dataset, train_labels, { k: 2 }) // consider 2 nearest neighbors
-
-var test_dataset = [
-  [0.9, 0.9, 0.9],
-  [1.1, 1.1, 1.1],
-  [1.1, 1.1, 1.2],
-  [1.2, 1.2, 1.2],
-]
-var ans = knn.predict(test_dataset)
 
 export default {
   name: 'IndexPage',
@@ -131,16 +115,21 @@ export default {
       ]
     }
   },
-  /*async fetch() {
-    this.data = await fetch('~/static/questions_cleaned.csv')
-    const parser = parse({delimiter: ',', from_line: 2})
-    parser.on('readable', (row) => {
-      console.log(row)
-    })
-  },*/
   async mounted() {
-    const d = await d3.csv("questions_cleaned.csv")
-    console.log(d[0])
+    const wvs_data = await d3.csv("questions_cleaned.csv", (d) => {
+      const answers = []
+      for (let i=177; i<=195; i++) {
+        answers.push(parseInt(d['Q' + i]))
+      }
+      return {
+        answers: answers,
+        country: d.COUNTRY
+      }
+    })
+    const training_data = wvs_data.map(({answers}) => answers)
+    const training_labels = wvs_data.map(({country}) => country)
+    this.knn = new KNN(training_data, training_labels, { k: 100 })
+    console.log(this.knn)
   },
   methods: {
     get_answer(n) {
@@ -158,7 +147,13 @@ export default {
     },
     predicted_country: {
       get() {
-        return null
+        const vector = this.survey.map(({value}) => value)
+        if (Object.values(vector).includes(null)) {
+          return 'answers incomplete'
+        }
+        else {
+          return this.knn.predict(vector)
+        }
       }
     }
   }
