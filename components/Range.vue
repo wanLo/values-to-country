@@ -12,7 +12,7 @@
         style="left: var(--range-value); bottom: 2.25rem"
         class="absolute bg-white text-gray-700 w-8 rounded-full text-center select-none"
       >
-        {{ Math.round(rangeValue) }}
+        {{ rangeValue }}
       </div>
       <input
         :value="rangeValue"
@@ -68,7 +68,8 @@ export default {
           'calc(' +
           this.rangeValue * 11 +
           '% + ' +
-          (-4.1) +
+          //(-4.1) +
+          (-3) +
           'rem)',
       }
     },
