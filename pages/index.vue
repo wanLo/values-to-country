@@ -4,11 +4,11 @@
       Values to <br> Country 🌏
     </h1>
     <div class="my-8 mx-2 text-gray-800">
-      This tool lets you predict the country closest to your values, judged by some questions
+      This tool predicts the country closest to your values, judged by some questions
       from the <a href="https://www.worldvaluessurvey.org/wvs.jsp" class="underline">World Value Survey</a>.
       The prediction is performed on your device, none of your data is sent anywhere.
     </div>
-    <h2 class="my-8 mx-2 text-gray-800">
+    <h2 class="my-8 mx-2 text-gray-800 font-medium">
       Please tell me for each of the following actions whether you think it can always be justified, never be justified, or something in between.
     </h2>
     <form>
@@ -16,7 +16,8 @@
         v-for="(item, index) in survey"
         :key="item.question"
       >
-        <h3 class="text-sm text-gray-700 sm:whitespace-no-wrap text-left mb-6 mt-4 mx-2">
+        <hr v-if="index===0"/>
+        <h3 class="text-sm text-gray-700 font-medium sm:whitespace-no-wrap text-left mb-6 mt-4 mx-2">
           {{ item.question }}
         </h3>
         <Range
@@ -29,9 +30,15 @@
         <hr />
       </div>
     </form>
-    <h2 class="my-16 mx-2 text-gray-800 text-center">
+    <div class="mt-16 mx-2 text-gray-800 font-medium text-center">
+      {{ (predicted_country != null) ? 'The country closest to your values is:' : 'Please fill in all answers to get a prediction.' }}
+    </div>
+    <h2 class="mb-8 mx-2 text-3xl text-gray-700 font-bold text-center">
       {{ predicted_country }}
     </h2>
+    <div class="mb-8 text-sm text-gray-400 text-center">
+      Check out the code on my <a href="https://github.com/wanLo/values-to-country" class="underline" target="_blank">GitHub</a>.
+    </div>
   </div>
 </template>
 
@@ -39,6 +46,7 @@
 import KNN from 'ml-knn'
 import Range from '~/components/Range'
 import * as d3 from "d3"
+import {iso31661} from 'iso-3166'
 
 export default {
   name: 'IndexPage',
@@ -158,10 +166,17 @@ export default {
       get() {
         const vector = this.survey.map(({value}) => value)
         if (Object.values(vector).includes(null)) {
-          return 'Please fill in all answers to get a prediction.'
+          return null
         }
         else {
-          return "The country closest to your values is: " + this.knn.predict(vector)
+          const country = this.knn.predict(vector)
+          const full_name = iso31661.find(c => c.alpha3 === country)
+          const codePoints = full_name.alpha2
+            .toUpperCase()
+            .split('')
+            .map(char =>  127397 + char.charCodeAt())
+          const flag = String.fromCodePoint(...codePoints)
+          return full_name.name + ' ' + flag
         }
       }
     }
