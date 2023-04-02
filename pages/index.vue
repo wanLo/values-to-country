@@ -31,12 +31,24 @@
       </div>
     </form>
     <div class="mt-16 mx-2 text-gray-800 font-medium text-center">
-      {{ (predicted_country != null) ? 'The country closest to your values is:' : 'Please fill in all answers to get a prediction.' }}
+      {{ (predicted_countries != null) ? 'The country closest to your values is:' : 'Please fill in all answers to get a prediction.' }}
     </div>
-    <h2 class="mb-8 mx-2 text-3xl text-gray-700 font-bold text-center">
-      {{ predicted_country }}
+    <h2
+      v-if="predicted_countries != null"
+      class="mb-8 mx-2 text-3xl text-gray-700 font-bold text-center"
+    >
+      {{ this.decode_alpha3(predicted_countries[0]) }}
     </h2>
-    <div class="mb-8 text-sm text-gray-400 text-center">
+    <div
+      v-if="predicted_countries != null"
+      class="mx-2 text-gray-800 font-medium text-center"
+    >
+      Followed by:<br/>
+      {{ this.decode_alpha3(predicted_countries[1]) }},<br/>
+      {{ this.decode_alpha3(predicted_countries[2]) }},<br/>
+      and {{ this.decode_alpha3(predicted_countries[3]) }}.
+    </div>
+    <div class="my-8 text-sm text-gray-400 text-center">
       Check out the code on my <a href="https://github.com/wanLo/values-to-country" class="underline" target="_blank">GitHub</a>.
     </div>
   </div>
@@ -154,6 +166,15 @@ export default {
     },
     set_answer(n, val) {
       this.survey[n].value = val
+    },
+    decode_alpha3(country) {
+      const full_name = iso31661.find(c => c.alpha3 === country)
+      const codePoints = full_name.alpha2
+        .toUpperCase()
+        .split('')
+        .map(char =>  127397 + char.charCodeAt())
+      const flag = String.fromCodePoint(...codePoints)
+      return full_name.name + ' ' + flag
     }
   },
   computed: {
@@ -162,21 +183,17 @@ export default {
         return this.survey.map(({value}) => value)
       }
     },
-    predicted_country: {
+    predicted_countries: {
       get() {
         const vector = this.survey.map(({value}) => value)
-        if (Object.values(vector).includes(null)) {
+        if (Object.values(vector).includes(null) || !this.knn) {
           return null
         }
         else {
-          const country = this.knn.predict(vector)
-          const full_name = iso31661.find(c => c.alpha3 === country)
-          const codePoints = full_name.alpha2
-            .toUpperCase()
-            .split('')
-            .map(char =>  127397 + char.charCodeAt())
-          const flag = String.fromCodePoint(...codePoints)
-          return full_name.name + ' ' + flag
+          const countries = this.knn.predictAll(vector)
+          const sorted = Object.entries(countries).sort(([,a],[,b]) => b-a)
+          //console.log(sorted.map(([name, score]) => score).reduce((partial, a) => partial + a, 0))
+          return sorted.map(([name, score]) => name)
         }
       }
     }
