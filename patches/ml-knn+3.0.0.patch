@@ -1,0 +1,97 @@
+diff --git a/node_modules/ml-knn/lib/index.js b/node_modules/ml-knn/lib/index.js
+index 22b3dc3..ff30637 100644
+--- a/node_modules/ml-knn/lib/index.js
++++ b/node_modules/ml-knn/lib/index.js
+@@ -305,7 +305,7 @@ class KNN {
+     const { distance = mlDistanceEuclidean.euclidean, k = classes.size + 1 } = options;
+ 
+     const points = new Array(dataset.length);
+-    for (var i = 0; i < points.length; ++i) {
++    for (i = 0; i < points.length; ++i) {
+       points[i] = dataset[i].slice();
+     }
+ 
+diff --git a/node_modules/ml-knn/src/index.js b/node_modules/ml-knn/src/index.js
+index 8389209..d137928 100644
+--- a/node_modules/ml-knn/src/index.js
++++ b/node_modules/ml-knn/src/index.js
+@@ -22,6 +22,17 @@ export default class KNN {
+ 
+     const classes = new Set(labels);
+ 
++    // calculate the relative size of each class to correct for imbalance
++    const class_sizes = Object.fromEntries( Array.from(classes).map( x => [x, 0]) );
++    for (var i=0; i<labels.length; ++i) {
++      ++class_sizes[labels[i]];
++    }
++    const max_size = Math.max(...Object.values(class_sizes))
++    Object.keys(class_sizes).forEach(function(key, index) {
++      class_sizes[key] /= max_size
++    })
++    this.class_sizes = class_sizes
++
+     const { distance = euclideanDistance, k = classes.size + 1 } = options;
+ 
+     const points = new Array(dataset.length);
+@@ -84,20 +95,43 @@ export default class KNN {
+   predict(dataset) {
+     if (Array.isArray(dataset)) {
+       if (typeof dataset[0] === 'number') {
+-        return getSinglePrediction(this, dataset);
++        return getSinglePrediction(this, dataset).predictedClass;
+       } else if (
+         Array.isArray(dataset[0]) &&
+         typeof dataset[0][0] === 'number'
+       ) {
+         const predictions = new Array(dataset.length);
+         for (var i = 0; i < dataset.length; i++) {
+-          predictions[i] = getSinglePrediction(this, dataset[i]);
++          predictions[i] = getSinglePrediction(this, dataset[i]).predictedClass;
+         }
+         return predictions;
+       }
+     }
+     throw new TypeError('dataset to predict must be an array or a matrix');
+   }
++
++    /**
++   * Predicts the output given the matrix to predict.
++   * @param {Array} dataset
++   * @return {Array} predictions
++   */
++    predictAll(dataset) {
++      if (Array.isArray(dataset)) {
++        if (typeof dataset[0] === 'number') {
++          return getSinglePrediction(this, dataset).pointsPerClass;
++        } else if (
++          Array.isArray(dataset[0]) &&
++          typeof dataset[0][0] === 'number'
++        ) {
++          const predictions = new Array(dataset.length);
++          for (var i = 0; i < dataset.length; i++) {
++            predictions[i] = getSinglePrediction(this, dataset[i]).pointsPerClass;
++          }
++          return predictions;
++        }
++      }
++      throw new TypeError('dataset to predict must be an array or a matrix');
++    }
+ }
+ 
+ function getSinglePrediction(knn, currentCase) {
+@@ -113,12 +147,13 @@ function getSinglePrediction(knn, currentCase) {
+ 
+   for (var i = 0; i < nearestPoints.length; ++i) {
+     var currentClass = nearestPoints[i][0][lastElement];
+-    var currentPoints = ++pointsPerClass[currentClass];
++    pointsPerClass[currentClass] += 1/knn.class_sizes[currentClass]
++    var currentPoints = pointsPerClass[currentClass]
+     if (currentPoints > maxPoints) {
+       predictedClass = currentClass;
+       maxPoints = currentPoints;
+     }
+   }
+ 
+-  return predictedClass;
++  return {predictedClass, pointsPerClass}
+ }
